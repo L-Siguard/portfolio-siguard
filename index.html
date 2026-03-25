@@ -431,18 +431,6 @@ const SANITY_DATASET    = 'production';
 const SANITY_API_VERSION = '2024-01-01';
 const ADMIN_PASSWORD    = 'siguard2026';      // Change ce mot de passe !
 
-// URL de l'image via Sanity CDN
-function sanityImageUrl(ref) {
-  if (!ref) return '';
-  // ref format: "image-abc123def456-1920x1080-jpg"
-  const withoutPrefix = ref.replace('image-', '');
-  const parts = withoutPrefix.split('-');
-  const format = parts.pop();
-  const dimensions = parts.pop();
-  const id = parts.join('-');
-  return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}-${dimensions}.${format}`;
-}
-
 // Requête GROQ vers l'API Sanity
 async function sanityFetch(query) {
   const encoded = encodeURIComponent(query);
@@ -603,7 +591,7 @@ function animateThumbs() {
     const thumb = document.createElement('div');
     thumb.className = `thumb-item ${i === state.activeImage ? 'active' : ''}`;
     const img = document.createElement('img');
-    img.src = sanityImageUrl(imgRef.asset._ref) + '?w=120&auto=format';
+    img.src = imgRef.url + '?w=120&auto=format';
     img.alt = '';
     thumb.appendChild(img);
 
@@ -637,15 +625,17 @@ function renderThumbs() { animateThumbs(); }
 function renderPreview() {
   const p = document.getElementById('main-preview');
   const imgs = getActiveImages();
+  // Correction ici : on utilise directement .url
   if (imgs.length === 0 || state.activeImage >= imgs.length) { p.innerHTML = ''; return; }
-  buildPreview(p, sanityImageUrl(imgs[state.activeImage].asset._ref) + '?auto=format');
+  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
 }
 
 function animatePreview() {
   const p = document.getElementById('main-preview');
   const imgs = getActiveImages();
   if (imgs.length === 0 || state.activeImage >= imgs.length) return;
-  buildPreview(p, sanityImageUrl(imgs[state.activeImage].asset._ref) + '?auto=format');
+  // Correction ici : on utilise directement .url
+  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
 }
 
 function buildPreview(container, src) {
@@ -800,7 +790,7 @@ function renderAdminImages() {
     const card = document.createElement('div'); card.className = 'admin-img-card';
     card.style.animationDelay = `${i * 0.04}s`;
     const img = document.createElement('img');
-    img.src = sanityImageUrl(imgRef.asset._ref) + '?w=400&auto=format';
+    img.src = imgRef.url + '?w=400&auto=format';
     img.alt = '';
     card.appendChild(img);
     const lbl = document.createElement('div'); lbl.className = 'img-label';
@@ -844,10 +834,10 @@ async function init() {
 
     const categories = await sanityFetch(`*[_type == "category"] | order(order asc) {
       _id, name, order,
-      "subcategories": *[_type == "project" && references(^._id)] | order(order asc) {
-        _id, name, order,
-        images[]{ asset->{ _id, _ref, url } }
-      }
+		"subcategories": *[_type == "project" && references(^._id)] | order(order asc) {
+		_id, name, order,
+		images[]{ "url": asset->url } // On demande l'URL directe ici
+		}
     }`);
 
     portfolioData = {
