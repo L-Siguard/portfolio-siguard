@@ -16,7 +16,7 @@
   --grey-light: #bbb;
   --font: 'Barlow Condensed', sans-serif;
   --font-cat: 'Barlow', sans-serif;
-  --thumb-h: 360px; /* Hauteur de référence pour l'alignement du menu */
+  --thumb-h: 360px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -94,8 +94,7 @@ body::after {
 .nav-aligner { 
   flex: 1; 
   display: flex; 
-  align-items: flex-start; /* Aligné en haut pour correspondre aux images */
-  padding-top: 60px; /* Ajustement pour être en face de la première ligne d'images */
+  align-items: center; /* On garde le centrage pour le menu */
 }
 
 .nav-inner {
@@ -140,35 +139,29 @@ body::after {
 
 /* ══ CONTENT ══ */
 .content-area {
-  flex: 1; 
-  display: flex; 
-  gap: 32px;
-  align-items: flex-start; /* Aligné en haut pour la grille */
-  position: relative; 
-  z-index: 2; 
-  margin-left: 24px;
-  padding-top: 60px; /* Aligné avec le menu */
+  flex: 1; display: flex; gap: 24px;
+  align-items: center; position: relative; z-index: 2; margin-left: 24px;
 }
 
-/* ══ GRILLE DE VIGNETTES (MAX 4 PAR LIGNE) ══ */
-.thumbs-strip { flex: 0 0 auto; }
+/* ══ MODIFICATION GRILLE 4 COLONNES ══ */
+.thumbs-strip { 
+    flex: 0 0 auto; 
+    align-self: center; 
+}
 .thumb-col { 
-  display: grid; 
-  grid-template-columns: repeat(4, 58px); /* 4 colonnes de 58px */
-  gap: 12px; 
-  height: auto; /* Permet de grandir vers le bas */
+    display: grid; /* On passe en grid */
+    grid-template-columns: repeat(4, 58px); /* 4 colonnes de 58px */
+    gap: 10px; 
+    height: auto; /* Hauteur automatique pour laisser la grille grandir */
 }
 
 .thumb-wrapper { display: flex; flex-direction: column; width: 58px; }
 
 .thumb-item {
-  width: 58px;
-  height: 80px; /* Hauteur fixe pour la régularité de la grille */
-  cursor: none; 
-  overflow: hidden;
-  position: relative; 
-  opacity: 0; 
-  transform: translateX(40px);
+  width: 58px; 
+  height: 80px; /* On fixe une hauteur pour que la grille soit régulière */
+  cursor: none; overflow: hidden;
+  position: relative; opacity: 0; transform: translateX(40px);
   transition: outline-color 0.2s;
 }
 .thumb-item.slide-in { animation: thumbSlide 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
@@ -238,7 +231,7 @@ body::after {
   #app { flex-direction: column; padding: 32px 24px; }
   .sidebar { flex: none; }
   .nav-inner { height: auto; }
-  .content-area { flex-direction: column; margin-left: 0; padding-top: 20px; }
+  .content-area { flex-direction: column; margin-left: 0; }
   .thumb-col { grid-template-columns: repeat(4, 1fr); height: auto; }
   body { cursor: auto; }
   #cursor { display: none; }
@@ -275,6 +268,7 @@ body::after {
 </div>
 
 <script>
+// TOUT LE JAVASCRIPT SANITY RESTE EXACTEMENT LE MÊME
 const SANITY_PROJECT_ID = 'obqf97j9';
 const SANITY_DATASET    = 'production';
 const SANITY_API_VERSION = '2024-01-01';
@@ -444,4 +438,32 @@ function buildPreview(container, src) {
   w.appendChild(img);
   w.onclick = () => window.open(src, '_blank');
   container.innerHTML = ''; container.appendChild(w);
-  void w.offsetWidth; w.classList
+  void w.offsetWidth; w.classList.add('reveal');
+}
+
+async function init() {
+  try {
+    const result = await sanityFetch(`*[_type == "portfolioSettings"][0]{
+      accentColor, "landingBg": landingBg.asset->url, "siteBg": siteBg.asset->url
+    }`);
+    const categories = await sanityFetch(`*[_type == "category"] | order(order asc) {
+      _id, name, order,
+      "subcategories": *[_type == "project" && references(^._id)] | order(order asc) {
+        _id, name, order, images[]{ "url": asset->url }
+      }
+    }`);
+    portfolioData = { settings: result || {}, categories: categories || [] };
+    if (portfolioData.settings.accentColor) applyAccentColor(portfolioData.settings.accentColor);
+  } catch(e) {
+    console.warn('Sanity error', e);
+    portfolioData = { settings: {}, categories: [] };
+  }
+  const ls = document.getElementById('loading-screen');
+  ls.classList.add('fade-out');
+  setTimeout(() => ls.remove(), 600);
+  renderBg(true); renderNav(); renderThumbs(); renderPreview();
+}
+init();
+</script>
+</body>
+</html>
