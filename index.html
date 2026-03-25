@@ -30,6 +30,10 @@ body {
   cursor: none;
 }
 
+body.admin-mode { cursor: auto !important; }
+body.admin-mode #cursor { display: none !important; }
+body.admin-mode * { cursor: auto !important; }
+
 body::after {
   content: ''; position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
@@ -70,6 +74,7 @@ body::after {
   display: flex; min-height: 100vh;
   padding: 48px 56px; position: relative;
 }
+#app.hidden { display: none; }
 
 .sidebar {
   flex: 0 0 220px; display: flex;
@@ -98,6 +103,10 @@ body::after {
   flex-direction: column; justify-content: space-between;
   align-items: flex-start; width: 100%;
 }
+
+.nav-top { }
+.nav-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.nav-bottom { }
 
 .cat-main {
   font-family: var(--font-cat); font-size: 26px; font-weight: 800;
@@ -212,12 +221,118 @@ body::after {
   40% { transform: scale(1); opacity: 1; }
 }
 
+/* ══ ADMIN TOGGLE ══ */
+.admin-toggle {
+  position: fixed; bottom: 20px; right: 20px;
+  width: 16px; height: 16px; background: rgba(0,0,0,0.12);
+  border: none; cursor: none; z-index: 100;
+  transition: transform 0.2s, background 0.2s; border-radius: 2px;
+}
+.admin-toggle:hover { transform: scale(1.2); background: rgba(0,0,0,0.35); }
+
+/* ══ PASSWORD ══ */
+#pw-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 9999;
+  align-items: center; justify-content: center;
+}
+#pw-overlay.visible { display: flex; }
+.pw-box { background: var(--bg); padding: 32px; min-width: 300px; box-shadow: 8px 12px 40px rgba(0,0,0,0.25); }
+.pw-title { font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+.pw-input { font-family: var(--font); font-size: 14px; font-weight: 500; padding: 8px 12px; border: 1px solid rgba(0,0,0,0.2); background: transparent; color: var(--fg); width: 100%; cursor: text !important; }
+.pw-input.error { border-color: #e55; }
+.pw-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.pw-hint { font-size: 11px; color: #e55; margin-top: 8px; display: none; letter-spacing: 1px; }
+.pw-hint.show { display: block; }
+
+/* ══ ADMIN VIEW ══ */
+#admin-view { display: none; min-height: 100vh; padding: 48px 56px; position: relative; z-index: 9999; background: var(--bg); }
+#admin-view.visible { display: block; }
+
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; }
+.admin-title { font-size: 20px; font-weight: 700; letter-spacing: 5px; text-transform: uppercase; }
+
+.btn { font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; border: 2px solid var(--fg); background: none; color: var(--fg); cursor: pointer; transition: all 0.2s; }
+.btn:hover { background: var(--fg); color: var(--bg); }
+.btn-accent { border-color: var(--accent); color: var(--accent); }
+.btn-accent:hover { background: var(--accent); color: var(--fg); }
+.btn-sm { padding: 6px 12px; font-size: 11px; }
+
+.admin-grid { display: grid; grid-template-columns: 280px 1fr; gap: 48px; }
+.admin-cats { display: flex; flex-direction: column; gap: 24px; }
+.admin-cat-block { border: 1px solid rgba(0,0,0,0.12); padding: 16px; }
+.admin-cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.admin-cat-name { font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+.admin-subcat-list { display: flex; flex-direction: column; gap: 6px; }
+.admin-subcat-row { display: flex; align-items: center; gap: 8px; }
+.admin-subcat-name { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; flex: 1; padding: 4px 0; transition: color 0.2s; }
+.admin-subcat-name:hover { color: var(--accent); }
+.admin-subcat-name.selected { color: var(--accent); }
+.admin-add-row { display: flex; gap: 6px; margin-top: 8px; }
+.admin-input { font-family: var(--font); font-size: 12px; font-weight: 500; letter-spacing: 1px; padding: 6px 10px; border: 1px solid rgba(0,0,0,0.2); background: transparent; color: var(--fg); flex: 1; text-transform: uppercase; }
+.admin-input::placeholder { color: var(--grey-light); text-transform: none; }
+.admin-images { min-height: 300px; }
+.admin-images-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.admin-images-title { font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--grey-mid); }
+.admin-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.admin-img-card { position: relative; background: #1a1a1a; aspect-ratio: 16/10; overflow: hidden; animation: fadeUp 0.35s ease forwards; }
+.admin-img-card img { width: 100%; height: 100%; object-fit: cover; }
+.admin-img-card .img-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: #fff; font-size: 10px; letter-spacing: 1px; padding: 4px 6px; text-align: center; }
+.no-selection-msg { font-size: 13px; font-weight: 600; color: var(--grey-mid); letter-spacing: 3px; text-transform: uppercase; padding: 40px 0; }
+
+/* ══ SANITY NOTICE ══ */
+.sanity-notice {
+  border: 1px dashed rgba(0,0,0,0.2); padding: 16px;
+  font-size: 12px; color: var(--grey-mid); letter-spacing: 1px;
+  line-height: 1.7; margin-bottom: 24px;
+}
+.sanity-notice a { color: var(--accent); text-decoration: none; }
+.sanity-notice a:hover { text-decoration: underline; }
+.sanity-notice strong { color: var(--fg); }
+
+/* ══ SETTINGS PANEL ══ */
+.admin-settings-block {
+  border: 1px solid rgba(0,0,0,0.12); padding: 16px; margin-bottom: 24px;
+}
+.admin-settings-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px;
+}
+.admin-settings-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  color: var(--grey-mid); text-transform: uppercase; flex: 1;
+}
+.admin-color-preview {
+  width: 32px; height: 32px; border: 2px solid rgba(0,0,0,0.15);
+  cursor: pointer; flex-shrink: 0;
+}
+.admin-color-input {
+  font-family: var(--font); font-size: 12px; padding: 6px 10px;
+  border: 1px solid rgba(0,0,0,0.2); background: transparent;
+  color: var(--fg); width: 110px; letter-spacing: 1px;
+}
+.admin-bg-section { border: 1px solid rgba(0,0,0,0.12); padding: 16px; margin-bottom: 24px; }
+.admin-bg-preview { width: 100%; aspect-ratio: 16/9; background: #222; overflow: hidden; margin-top: 12px; cursor: pointer; position: relative; }
+.admin-bg-preview img { width: 100%; height: 100%; object-fit: cover; }
+.admin-bg-preview .placeholder { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--grey-mid); text-transform: uppercase; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 10001; align-items: center; justify-content: center; }
+.modal-overlay.visible { display: flex; }
+.modal { background: var(--bg); padding: 32px; min-width: 320px; box-shadow: 8px 12px 40px rgba(0,0,0,0.2); }
+.modal-title { font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+.modal-field { margin-bottom: 16px; }
+.modal-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--grey-mid); text-transform: uppercase; display: block; margin-bottom: 6px; }
+.modal-input { font-family: var(--font); font-size: 14px; font-weight: 500; padding: 8px 12px; border: 1px solid rgba(0,0,0,0.2); background: transparent; color: var(--fg); width: 100%; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
 @media (max-width: 900px) {
   #app { flex-direction: column; padding: 32px 24px; }
   .sidebar { flex: none; }
   .nav-inner { height: auto; }
   .content-area { flex-direction: column; margin-left: 0; }
   .thumb-col { height: 180px; }
+  .admin-grid { grid-template-columns: 1fr; }
   body { cursor: auto; }
   #cursor { display: none; }
 }
@@ -225,6 +340,7 @@ body::after {
 </head>
 <body>
 
+<!-- Loading -->
 <div id="loading-screen">
   <div style="display:flex">
     <div class="loading-dot"></div>
@@ -236,6 +352,7 @@ body::after {
 <div id="cursor"></div>
 <div id="bg-layer"></div>
 
+<!-- ══ PORTFOLIO ══ -->
 <div id="app">
   <div class="sidebar">
     <div>
@@ -252,11 +369,77 @@ body::after {
   </div>
 </div>
 
+<button class="admin-toggle" id="admin-toggle" title="Admin"></button>
+
+<!-- Password -->
+<div id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-title">Administration</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="Mot de passe..." />
+    <div class="pw-hint" id="pw-hint">Mot de passe incorrect</div>
+    <div class="pw-actions">
+      <button class="btn btn-sm" id="pw-cancel">Annuler</button>
+      <button class="btn btn-sm btn-accent" id="pw-submit">Entrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div id="admin-view">
+  <div class="admin-header">
+    <div class="admin-title">Administration</div>
+    <button class="btn" id="admin-back">← Portfolio</button>
+  </div>
+
+  <!-- Sanity notice -->
+  <div class="sanity-notice">
+    ℹ️ &nbsp;Ce panneau est en <strong>lecture seule</strong> — il reflète le contenu de Sanity.<br>
+    Pour modifier les images, catégories ou réglages, rendez-vous sur votre
+    <a href="https://www.sanity.io/manage" target="_blank">Studio Sanity →</a>
+    Les modifications sont <strong>instantanées</strong> sur le site.
+  </div>
+
+  <div class="admin-grid">
+    <div class="admin-cats" id="admin-cats"></div>
+    <div class="admin-images" id="admin-images">
+      <div class="no-selection-msg">Sélectionnez une sous-catégorie</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-field">
+      <label class="modal-label" id="modal-label">Nom</label>
+      <input class="modal-input" id="modal-input" placeholder="Nom..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-sm" id="modal-cancel">Annuler</button>
+      <button class="btn btn-sm btn-accent" id="modal-confirm">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const SANITY_PROJECT_ID = 'obqf97j9';
+// ══════════════════════════════════════════════
+//  CONFIGURATION SANITY — À remplir après setup
+// ══════════════════════════════════════════════
+const SANITY_PROJECT_ID = 'obqf97j9';   //
 const SANITY_DATASET    = 'production';
 const SANITY_API_VERSION = '2024-01-01';
+const ADMIN_PASSWORD    = 'siguard2026';      // Change ce mot de passe !
 
+// URL de l'image via Sanity CDN
+function sanityImageUrl(ref) {
+  if (!ref) return '';
+  // ref format: "image-abc123-1920x1080-jpg"
+  const [, id, dimensions, format] = ref.split('-');
+  return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${id}-${dimensions}.${format}`;
+}
+
+// Requête GROQ vers l'API Sanity
 async function sanityFetch(query) {
   const encoded = encodeURIComponent(query);
   const url = `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}?query=${encoded}`;
@@ -266,11 +449,15 @@ async function sanityFetch(query) {
   return json.result;
 }
 
+// ══ STATE ══
 let portfolioData = null;
 let state = {
   activeCat: null,
   activeSubcat: null,
   activeImage: 0,
+  adminSelectedSubcat: null,
+  authenticated: false,
+  view: 'portfolio',
   isLanding: true,
 };
 
@@ -285,13 +472,15 @@ document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; })
   cursor.style.top = cy + 'px';
   requestAnimationFrame(tickCursor);
 })();
-const HOVER_SEL = 'a, button, .cat-main, .sub-item, .thumb-item, .thumb-wrapper, .preview-wrap, .nav-bottom-link';
+const HOVER_SEL = 'a, button, .cat-main, .sub-item, .thumb-item, .thumb-wrapper, .admin-bg-preview, .admin-subcat-name, .preview-wrap, .admin-toggle, .nav-bottom-link';
 document.addEventListener('mouseover', e => { if (e.target.closest(HOVER_SEL)) cursor.classList.add('active'); });
 document.addEventListener('mouseout',  e => { if (e.target.closest(HOVER_SEL)) cursor.classList.remove('active'); });
 
+// ══ ACCENT COLOR ══
 function applyAccentColor(hex) {
   if (!hex) return;
   document.documentElement.style.setProperty('--accent', hex);
+  // Calcule une version plus sombre pour --accent-dim
   const r = parseInt(hex.slice(1,3),16);
   const g = parseInt(hex.slice(3,5),16);
   const b = parseInt(hex.slice(5,7),16);
@@ -299,10 +488,15 @@ function applyAccentColor(hex) {
   document.documentElement.style.setProperty('--accent-dim', dim);
 }
 
+// ══ BACKGROUND ══
 function renderBg(isLanding) {
   const el = document.getElementById('bg-layer');
   el.classList.remove('loaded', 'has-image');
-  const url = isLanding ? portfolioData?.settings?.landingBg : portfolioData?.settings?.siteBg;
+
+  const url = isLanding
+    ? portfolioData?.settings?.landingBg
+    : portfolioData?.settings?.siteBg;
+
   if (url) {
     el.classList.add('has-image');
     el.style.backgroundImage = `url(${url})`;
@@ -313,23 +507,26 @@ function renderBg(isLanding) {
   }
 }
 
+// ══ HOME ══
 document.getElementById('home-link').onclick = e => {
   e.preventDefault();
   state.activeCat = null; state.activeSubcat = null; state.activeImage = 0; state.isLanding = true;
   renderBg(true); renderNav(); renderThumbs(); renderPreview();
 };
 
+// ══ NAV ══
 function renderNav() {
   const container = document.getElementById('nav-inner');
   container.innerHTML = '';
   if (!portfolioData) return;
 
-  const topEl = document.createElement('div');
+  const topEl = document.createElement('div'); topEl.className = 'nav-top';
   const midEl = document.createElement('div'); midEl.className = 'nav-mid';
-  const bottomEl = document.createElement('div');
+  const bottomEl = document.createElement('div'); bottomEl.className = 'nav-bottom';
 
   portfolioData.categories.forEach(cat => {
     const isActive = state.activeCat === cat._id;
+
     if (!cat.subcategories || cat.subcategories.length === 0) {
       const btn = document.createElement('button');
       btn.className = `nav-bottom-link ${isActive ? 'active' : ''}`;
@@ -344,26 +541,41 @@ function renderNav() {
       btn.className = `cat-main ${isActive ? 'active' : ''}`;
       btn.textContent = cat.name;
       btn.onclick = () => {
-        if (state.activeCat === cat._id) { state.activeCat = null; state.activeSubcat = null; state.isLanding = true; }
-        else { state.activeCat = cat._id; state.isLanding = false; if (cat.subcategories.length > 0) state.activeSubcat = cat.subcategories[0]._id; }
-        state.activeImage = 0; renderBg(state.isLanding); renderNav(); animateThumbs(); renderPreview();
+        if (state.activeCat === cat._id) {
+          state.activeCat = null; state.activeSubcat = null; state.isLanding = true;
+        } else {
+          state.activeCat = cat._id; state.isLanding = false;
+          if (cat.subcategories.length > 0) state.activeSubcat = cat.subcategories[0]._id;
+        }
+        state.activeImage = 0;
+        renderBg(state.isLanding); renderNav(); animateThumbs(); renderPreview();
       };
       topEl.appendChild(btn);
+
       if (isActive) {
         cat.subcategories.forEach((sub, si) => {
           const subBtn = document.createElement('button');
           subBtn.className = `sub-item ${state.activeSubcat === sub._id ? 'active' : ''}`;
           subBtn.textContent = sub.name;
-          subBtn.onclick = e => { e.stopPropagation(); state.activeSubcat = sub._id; state.activeImage = 0; renderNav(); animateThumbs(); renderPreview(); };
+          subBtn.onclick = e => {
+            e.stopPropagation();
+            const changed = state.activeSubcat !== sub._id;
+            state.activeSubcat = sub._id; state.activeImage = 0;
+            renderNav(); if (changed) animateThumbs(); renderPreview();
+          };
           setTimeout(() => subBtn.classList.add('visible'), si * 60 + 40);
           midEl.appendChild(subBtn);
         });
       }
     }
   });
-  container.appendChild(topEl); container.appendChild(midEl); container.appendChild(bottomEl);
+
+  container.appendChild(topEl);
+  container.appendChild(midEl);
+  container.appendChild(bottomEl);
 }
 
+// ══ THUMBNAILS ══
 function getActiveImages() {
   if (!portfolioData || !state.activeSubcat) return [];
   for (const cat of portfolioData.categories)
@@ -375,78 +587,291 @@ function getActiveImages() {
 function animateThumbs() {
   const strip = document.getElementById('thumbs-strip');
   const imgs = getActiveImages();
+  if (imgs.length === 0) { strip.innerHTML = ''; renderPreview(); return; }
+
   strip.innerHTML = '';
-  if (imgs.length === 0) { renderPreview(); return; }
   const col = document.createElement('div'); col.className = 'thumb-col';
+
   imgs.forEach((imgRef, i) => {
     const wrapper = document.createElement('div');
     wrapper.className = `thumb-wrapper ${i === state.activeImage ? 'active' : ''}`;
+
     const thumb = document.createElement('div');
     thumb.className = `thumb-item ${i === state.activeImage ? 'active' : ''}`;
     const img = document.createElement('img');
-    img.src = imgRef.url + '?w=600&auto=format';
+    img.src = sanityImageUrl(imgRef.asset._ref) + '?w=120&auto=format';
+    img.alt = '';
     thumb.appendChild(img);
+
     thumb.onclick = () => {
       state.activeImage = i;
       document.querySelectorAll('.thumb-item').forEach((t,j) => t.classList.toggle('active', j === i));
       document.querySelectorAll('.thumb-wrapper').forEach((t,j) => t.classList.toggle('active', j === i));
       animatePreview();
     };
+
     const label = document.createElement('div');
-    label.className = 'thumb-label'; label.textContent = String(i + 1).padStart(2, '0');
-    wrapper.appendChild(thumb); wrapper.appendChild(label); col.appendChild(wrapper);
-    setTimeout(() => { thumb.classList.add('slide-in'); label.classList.add('slide-in'); }, i * 60);
+    label.className = 'thumb-label';
+    label.textContent = String(i + 1).padStart(2, '0');
+
+    wrapper.appendChild(thumb); wrapper.appendChild(label);
+    col.appendChild(wrapper);
+
+    setTimeout(() => {
+      thumb.classList.add('slide-in');
+      label.classList.add('slide-in');
+    }, i * 60);
   });
-  strip.appendChild(col); renderPreview();
+
+  strip.appendChild(col);
+  renderPreview();
 }
 
 function renderThumbs() { animateThumbs(); }
 
+// ══ PREVIEW ══
 function renderPreview() {
   const p = document.getElementById('main-preview');
   const imgs = getActiveImages();
   if (imgs.length === 0 || state.activeImage >= imgs.length) { p.innerHTML = ''; return; }
-  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
+  buildPreview(p, sanityImageUrl(imgs[state.activeImage].asset._ref) + '?auto=format');
 }
 
 function animatePreview() {
   const p = document.getElementById('main-preview');
   const imgs = getActiveImages();
   if (imgs.length === 0 || state.activeImage >= imgs.length) return;
-  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
+  buildPreview(p, sanityImageUrl(imgs[state.activeImage].asset._ref) + '?auto=format');
 }
 
 function buildPreview(container, src) {
-  const w = document.createElement('div'); w.className = 'preview-wrap';
-  const img = document.createElement('img'); img.src = src;
+  const w = document.createElement('div');
+  w.className = 'preview-wrap'; w.title = 'Ouvrir en plein format';
+  const img = document.createElement('img'); img.src = src; img.alt = '';
   w.appendChild(img);
   w.onclick = () => window.open(src, '_blank');
   container.innerHTML = ''; container.appendChild(w);
   void w.offsetWidth; w.classList.add('reveal');
 }
 
+// ══ ADMIN ══
+function toggleAdmin(show) {
+  state.view = show ? 'admin' : 'portfolio';
+  document.body.classList.toggle('admin-mode', show);
+  document.getElementById('app').classList.toggle('hidden', show);
+  document.getElementById('admin-view').classList.toggle('visible', show);
+  if (show) renderAdminContent();
+  else { renderNav(); animateThumbs(); renderPreview(); }
+}
+
+document.getElementById('admin-toggle').onclick = () => {
+  if (state.view === 'admin') { toggleAdmin(false); return; }
+  if (state.authenticated) { toggleAdmin(true); return; }
+  document.getElementById('pw-overlay').classList.add('visible');
+  const inp = document.getElementById('pw-input');
+  inp.value = ''; inp.classList.remove('error');
+  document.getElementById('pw-hint').classList.remove('show');
+  inp.focus();
+};
+document.getElementById('pw-cancel').onclick = () => document.getElementById('pw-overlay').classList.remove('visible');
+function checkPw() {
+  if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+    state.authenticated = true;
+    document.getElementById('pw-overlay').classList.remove('visible');
+    toggleAdmin(true);
+  } else {
+    document.getElementById('pw-input').classList.add('error');
+    document.getElementById('pw-hint').classList.add('show');
+  }
+}
+document.getElementById('pw-submit').onclick = checkPw;
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPw(); });
+document.getElementById('admin-back').onclick = () => toggleAdmin(false);
+
+function renderAdminContent() {
+  const el = document.getElementById('admin-cats');
+  el.innerHTML = '';
+  if (!portfolioData) return;
+
+  // ── Paramètres globaux ──
+  const settingsBlock = document.createElement('div');
+  settingsBlock.className = 'admin-settings-block';
+  const settingsTitle = document.createElement('div');
+  settingsTitle.className = 'admin-cat-name'; settingsTitle.textContent = 'RÉGLAGES GLOBAUX';
+  settingsBlock.appendChild(settingsTitle);
+
+  // Couleur accent
+  const colorRow = document.createElement('div'); colorRow.className = 'admin-settings-row';
+  const colorLabel = document.createElement('div'); colorLabel.className = 'admin-settings-label'; colorLabel.textContent = 'Couleur accent';
+  const colorPreview = document.createElement('div');
+  colorPreview.className = 'admin-color-preview';
+  colorPreview.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  const colorInput = document.createElement('input');
+  colorInput.className = 'admin-color-input'; colorInput.type = 'text';
+  colorInput.value = portfolioData.settings?.accentColor || '#3dffc2';
+  colorInput.placeholder = '#3dffc2';
+  const colorNote = document.createElement('div');
+  colorNote.style.cssText = 'font-size:10px;color:var(--grey-mid);letter-spacing:1px;margin-top:6px;';
+  colorNote.textContent = '→ Modifiez via Sanity Studio pour persister';
+  colorRow.appendChild(colorLabel); colorRow.appendChild(colorPreview); colorRow.appendChild(colorInput);
+  settingsBlock.appendChild(colorRow); settingsBlock.appendChild(colorNote);
+
+  colorInput.addEventListener('input', () => {
+    const val = colorInput.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      colorPreview.style.background = val;
+      applyAccentColor(val);
+    }
+  });
+
+  el.appendChild(settingsBlock);
+
+  // ── Images de fond ──
+  const makeBgBlock = (title, url) => {
+    const block = document.createElement('div'); block.className = 'admin-bg-section';
+    const t = document.createElement('div'); t.className = 'admin-cat-name'; t.textContent = title;
+    block.appendChild(t);
+    const preview = document.createElement('div'); preview.className = 'admin-bg-preview';
+    if (url) {
+      const img = document.createElement('img'); img.src = url; preview.appendChild(img);
+    } else {
+      const p = document.createElement('div'); p.className = 'placeholder'; p.textContent = 'Aucune image';
+      preview.appendChild(p);
+    }
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:10px;color:var(--grey-mid);letter-spacing:1px;margin-top:8px;';
+    note.textContent = '→ Modifiez via Sanity Studio';
+    block.appendChild(preview); block.appendChild(note);
+    return block;
+  };
+
+  el.appendChild(makeBgBlock('FOND LANDING', portfolioData.settings?.landingBg));
+  el.appendChild(makeBgBlock('FOND SITE', portfolioData.settings?.siteBg));
+
+  // ── Catégories ──
+  portfolioData.categories.forEach(cat => {
+    const block = document.createElement('div'); block.className = 'admin-cat-block';
+    const header = document.createElement('div'); header.className = 'admin-cat-header';
+    const cn = document.createElement('div'); cn.className = 'admin-cat-name'; cn.textContent = cat.name;
+    header.appendChild(cn); block.appendChild(header);
+
+    const sl = document.createElement('div'); sl.className = 'admin-subcat-list';
+    (cat.subcategories || []).forEach(sub => {
+      const row = document.createElement('div'); row.className = 'admin-subcat-row';
+      const nm = document.createElement('div');
+      nm.className = `admin-subcat-name ${state.adminSelectedSubcat === sub._id ? 'selected' : ''}`;
+      nm.textContent = `${sub.name} (${(sub.images||[]).length} img)`;
+      nm.onclick = () => { state.adminSelectedSubcat = sub._id; renderAdminContent(); renderAdminImages(); };
+      row.appendChild(nm); sl.appendChild(row);
+    });
+    block.appendChild(sl);
+
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:10px;color:var(--grey-mid);letter-spacing:1px;margin-top:8px;';
+    note.textContent = '→ Ajoutez des projets/sous-catégories via Sanity';
+    block.appendChild(note);
+    el.appendChild(block);
+  });
+}
+
+function renderAdminImages() {
+  const c = document.getElementById('admin-images');
+  if (!state.adminSelectedSubcat) {
+    c.innerHTML = '<div class="no-selection-msg">Sélectionnez une sous-catégorie</div>'; return;
+  }
+  let sub = null;
+  for (const cat of portfolioData.categories)
+    for (const s of (cat.subcategories || []))
+      if (s._id === state.adminSelectedSubcat) { sub = s; break; }
+  if (!sub) return;
+
+  c.innerHTML = '';
+  const h = document.createElement('div'); h.className = 'admin-images-header';
+  const t = document.createElement('div'); t.className = 'admin-images-title';
+  t.textContent = `Images — ${sub.name} (${(sub.images||[]).length})`;
+  h.appendChild(t); c.appendChild(h);
+
+  const g = document.createElement('div'); g.className = 'admin-images-grid';
+  (sub.images || []).forEach((imgRef, i) => {
+    const card = document.createElement('div'); card.className = 'admin-img-card';
+    card.style.animationDelay = `${i * 0.04}s`;
+    const img = document.createElement('img');
+    img.src = sanityImageUrl(imgRef.asset._ref) + '?w=400&auto=format';
+    img.alt = '';
+    card.appendChild(img);
+    const lbl = document.createElement('div'); lbl.className = 'img-label';
+    lbl.textContent = `${i+1} / ${sub.images.length}`;
+    card.appendChild(lbl);
+    g.appendChild(card);
+  });
+
+  const note = document.createElement('div');
+  note.style.cssText = 'margin-top:16px;font-size:11px;color:var(--grey-mid);letter-spacing:1px;';
+  note.innerHTML = 'Pour ajouter ou supprimer des images → <a href="https://www.sanity.io/manage" target="_blank" style="color:var(--accent)">Sanity Studio</a>';
+  c.appendChild(g); c.appendChild(note);
+}
+
+// ══ MODAL ══
+let mcb = null;
+function showModal(t, l, cb) {
+  document.getElementById('modal-title').textContent = t;
+  document.getElementById('modal-label').textContent = l;
+  document.getElementById('modal-input').value = '';
+  document.getElementById('modal-overlay').classList.add('visible');
+  document.getElementById('modal-input').focus();
+  mcb = cb;
+}
+document.getElementById('modal-cancel').onclick = () => { document.getElementById('modal-overlay').classList.remove('visible'); mcb = null; };
+document.getElementById('modal-confirm').onclick = () => {
+  const v = document.getElementById('modal-input').value.trim();
+  if (v && mcb) mcb(v);
+  document.getElementById('modal-overlay').classList.remove('visible'); mcb = null;
+};
+document.getElementById('modal-input').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('modal-confirm').click(); });
+
+// ══ INIT ══
 async function init() {
   try {
     const result = await sanityFetch(`*[_type == "portfolioSettings"][0]{
-      accentColor, "landingBg": landingBg.asset->url, "siteBg": siteBg.asset->url
+      accentColor,
+      "landingBg": landingBg.asset->url,
+      "siteBg": siteBg.asset->url
     }`);
+
     const categories = await sanityFetch(`*[_type == "category"] | order(order asc) {
       _id, name, order,
       "subcategories": *[_type == "project" && references(^._id)] | order(order asc) {
-        _id, name, order, images[]{ "url": asset->url }
+        _id, name, order,
+        images[]{ asset->{ _id, _ref, url } }
       }
     }`);
-    portfolioData = { settings: result || {}, categories: categories || [] };
-    if (portfolioData.settings.accentColor) applyAccentColor(portfolioData.settings.accentColor);
+
+    portfolioData = {
+      settings: result || {},
+      categories: categories || []
+    };
+
+    // Appliquer couleur accent
+    if (portfolioData.settings.accentColor) {
+      applyAccentColor(portfolioData.settings.accentColor);
+    }
+
   } catch(e) {
-    console.warn('Sanity error', e);
+    console.warn('Sanity non configuré, données vides.', e);
     portfolioData = { settings: {}, categories: [] };
   }
+
+  // Masquer loading
   const ls = document.getElementById('loading-screen');
   ls.classList.add('fade-out');
   setTimeout(() => ls.remove(), 600);
-  renderBg(true); renderNav(); renderThumbs(); renderPreview();
+
+  renderBg(true);
+  renderNav();
+  renderThumbs();
+  renderPreview();
 }
+
 init();
 </script>
 </body>
