@@ -94,7 +94,7 @@ body::after {
 .nav-aligner { 
   flex: 1; 
   display: flex; 
-  align-items: center; /* On garde le centrage pour le menu */
+  align-items: center; 
 }
 
 .nav-inner {
@@ -140,26 +140,24 @@ body::after {
 /* ══ CONTENT ══ */
 .content-area {
   flex: 1; display: flex; gap: 24px;
-  align-items: center; position: relative; z-index: 2; margin-left: 24px;
+  align-items: center; /* Rétablit le centrage vertical original */
+  position: relative; z-index: 2; margin-left: 24px;
 }
 
-/* ══ MODIFICATION GRILLE 4 COLONNES ══ */
-.thumbs-strip { 
-    flex: 0 0 auto; 
-    align-self: center; 
-}
+/* ══ GRILLE 4 COLONNES AVEC HAUTEUR ORIGINALE ══ */
+.thumbs-strip { flex: 0 0 auto; }
 .thumb-col { 
-    display: grid; /* On passe en grid */
-    grid-template-columns: repeat(4, 58px); /* 4 colonnes de 58px */
-    gap: 10px; 
-    height: auto; /* Hauteur automatique pour laisser la grille grandir */
+  display: grid; 
+  grid-template-columns: repeat(4, 58px); /* Toujours 4 colonnes de 58px */
+  gap: 10px; 
+  height: auto; 
 }
 
 .thumb-wrapper { display: flex; flex-direction: column; width: 58px; }
 
 .thumb-item {
   width: 58px; 
-  height: 80px; /* On fixe une hauteur pour que la grille soit régulière */
+  height: 120px; /* Taille augmentée pour retrouver le style "strip" d'origine */
   cursor: none; overflow: hidden;
   position: relative; opacity: 0; transform: translateX(40px);
   transition: outline-color 0.2s;
@@ -183,7 +181,7 @@ body::after {
 .thumb-wrapper:hover .thumb-label { color: var(--fg); }
 .thumb-wrapper.active .thumb-label { color: var(--accent); }
 
-/* ══ PREVIEW ══ */
+/* ══ PREVIEW (Inchangé) ══ */
 .main-preview {
   flex: 1; display: flex;
   align-items: center; justify-content: center;
@@ -268,7 +266,7 @@ body::after {
 </div>
 
 <script>
-// TOUT LE JAVASCRIPT SANITY RESTE EXACTEMENT LE MÊME
+// LE JAVASCRIPT SANITY RESTE INCHANGÉ POUR NE RIEN CASSER
 const SANITY_PROJECT_ID = 'obqf97j9';
 const SANITY_DATASET    = 'production';
 const SANITY_API_VERSION = '2024-01-01';
@@ -290,7 +288,6 @@ let state = {
   isLanding: true,
 };
 
-// ══ CURSOR ══
 const cursor = document.getElementById('cursor');
 let cx = -50, cy = -50, tx = -50, ty = -50;
 document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
