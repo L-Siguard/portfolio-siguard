@@ -8,7 +8,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #d8d5d0;
+  --bg: #e8e8e8;
   --fg: #1a1a1a;
   --accent: #3dffc2;
   --accent-dim: #2bc99a;
@@ -62,7 +62,7 @@ body::after {
 #bg-layer.loaded { opacity: 1; }
 #bg-layer.has-image::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to right, rgba(216,213,208,0.95) 0%, rgba(216,213,208,0.8) 25%, rgba(0,0,0,0.1) 100%);
+  background: linear-gradient(to right, rgba(232,232,232,0.95) 0%, rgba(232,232,232,0.8) 25%, rgba(0,0,0,0.1) 100%);
 }
 
 /* ══ LAYOUT ══ */
@@ -233,7 +233,7 @@ body::after {
 }
 .preview-inner {
   display: flex; flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   max-width: 100%;
 }
 .preview-caption {
@@ -356,8 +356,8 @@ const cursor = document.getElementById('cursor');
 let cx = -50, cy = -50, tx = -50, ty = -50;
 document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
 (function tickCursor() {
-  cx += (tx - cx) * 0.18;
-  cy += (ty - cy) * 0.18;
+  cx += (tx - cx) * 0.6;
+  cy += (ty - cy) * 0.6;
   cursor.style.left = cx + 'px';
   cursor.style.top = cy + 'px';
   requestAnimationFrame(tickCursor);
