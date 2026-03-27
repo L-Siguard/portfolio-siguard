@@ -4,6 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>L. SIGUARD — Artist 2D/3D</title>
+
+<!-- SEO -->
+<meta name="description" content="Portfolio de L. Siguard — Artiste 2D/3D. Illustration, art numérique, modélisation 3D et photographie.">
+<meta name="author" content="L. Siguard">
+<meta name="keywords" content="artist, 2D, 3D, illustration, digital art, game art, portfolio, L. Siguard">
+
+<!-- Open Graph (Facebook, Discord, LinkedIn, etc.) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="L. SIGUARD — Artist 2D/3D">
+<meta property="og:description" content="Portfolio de L. Siguard — Artiste 2D/3D. Illustration, art numérique, modélisation 3D et photographie.">
+<meta property="og:url" content="https://lsiguard.com">
+<meta property="og:image" content="https://lsiguard.com/og-image.jpg">
+<meta property="og:locale" content="fr_FR">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="L. SIGUARD — Artist 2D/3D">
+<meta name="twitter:description" content="Portfolio de L. Siguard — Artiste 2D/3D. Illustration, art numérique, modélisation 3D et photographie.">
+<meta name="twitter:image" content="https://lsiguard.com/og-image.jpg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://lsiguard.com">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');
 
@@ -38,7 +60,7 @@ body::after {
 
 /* ══ CURSOR ══ */
 #cursor {
-  position: fixed; width: 14px; height: 14px;
+  position: fixed; width: 20px; height: 20px;
   pointer-events: none; z-index: 10000;
   display: flex; align-items: center; justify-content: center;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -48,8 +70,8 @@ body::after {
   content: ''; position: absolute;
   background-color: var(--fg); transition: background-color 0.2s;
 }
-#cursor::before { width: 100%; height: 2px; }
-#cursor::after { width: 2px; height: 100%; }
+#cursor::before { width: 100%; height: 1.5px; }
+#cursor::after { width: 1.5px; height: 100%; }
 #cursor.active { transform: translate(-50%, -50%) rotate(45deg) scale(1.2); }
 #cursor.active::before, #cursor.active::after { background-color: var(--accent); }
 
@@ -356,8 +378,8 @@ const cursor = document.getElementById('cursor');
 let cx = -50, cy = -50, tx = -50, ty = -50;
 document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
 (function tickCursor() {
-  cx += (tx - cx) * 0.6;
-  cy += (ty - cy) * 0.6;
+  cx += (tx - cx) * 0.18;
+  cy += (ty - cy) * 0.18;
   cursor.style.left = cx + 'px';
   cursor.style.top = cy + 'px';
   requestAnimationFrame(tickCursor);
