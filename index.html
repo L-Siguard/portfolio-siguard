@@ -183,9 +183,9 @@ body::after {
 
 /* ══ PREVIEW (Inchangé) ══ */
 .main-preview {
-  flex: 1; display: flex;
+  display: flex;
   align-items: center; justify-content: center;
-  min-height: 400px; overflow: hidden;
+  overflow: hidden;
 }
 
 .preview-wrap {
@@ -225,6 +225,58 @@ body::after {
   40% { transform: scale(1); opacity: 1; }
 }
 
+/* ══ IMAGE CAPTION ══ */
+.preview-container {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 400px; overflow: hidden;
+}
+.preview-inner {
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+}
+.preview-caption {
+  font-family: var(--font);
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--grey-mid);
+  margin-top: 16px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+}
+.preview-caption.visible { opacity: 1; transform: translateY(0); }
+
+/* ══ SHARE (Landing) ══ */
+.share-section {
+  position: fixed; bottom: 48px; left: 56px; z-index: 3;
+}
+.share-toggle {
+  font-family: var(--font-cat); font-size: 13px; font-weight: 400;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--fg); background: none; border: none;
+  cursor: none; padding: 0;
+  transition: color 0.3s;
+}
+.share-toggle:hover { color: var(--accent-dim); }
+
+.share-links {
+  display: flex; gap: 16px; margin-top: 6px;
+  overflow: hidden;
+}
+.share-link {
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--fg); text-decoration: none;
+  cursor: none; white-space: nowrap;
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity 0.4s cubic-bezier(0.16,1,0.3,1),
+              transform 0.4s cubic-bezier(0.16,1,0.3,1),
+              color 0.25s ease;
+}
+.share-link.visible { opacity: 1; transform: translateX(0); }
+.share-link:hover { color: var(--accent-dim); }
+
 @media (max-width: 900px) {
   #app { flex-direction: column; padding: 32px 24px; }
   .sidebar { flex: none; }
@@ -233,6 +285,8 @@ body::after {
   .thumb-col { grid-template-columns: repeat(4, 1fr); height: auto; }
   body { cursor: auto; }
   #cursor { display: none; }
+  .share-section { position: fixed; bottom: 24px; left: 24px; }
+  .share-toggle, .share-link { cursor: auto; }
 }
 </style>
 </head>
@@ -261,8 +315,18 @@ body::after {
   </div>
   <div class="content-area">
     <div class="thumbs-strip" id="thumbs-strip"></div>
-    <div class="main-preview" id="main-preview"></div>
+    <div class="preview-container" id="preview-container">
+      <div class="preview-inner">
+        <div class="main-preview" id="main-preview"></div>
+        <div class="preview-caption" id="preview-caption"></div>
+      </div>
+    </div>
   </div>
+</div>
+
+<div class="share-section" id="share-section" style="display:none;">
+  <button class="share-toggle" id="share-toggle">SHARE</button>
+  <div class="share-links" id="share-links"></div>
 </div>
 
 <script>
@@ -298,7 +362,7 @@ document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; })
   cursor.style.top = cy + 'px';
   requestAnimationFrame(tickCursor);
 })();
-const HOVER_SEL = 'a, button, .cat-main, .sub-item, .thumb-item, .thumb-wrapper, .preview-wrap, .nav-bottom-link';
+const HOVER_SEL = 'a, button, .cat-main, .sub-item, .thumb-item, .thumb-wrapper, .preview-wrap, .nav-bottom-link, .share-toggle, .share-link';
 document.addEventListener('mouseover', e => { if (e.target.closest(HOVER_SEL)) cursor.classList.add('active'); });
 document.addEventListener('mouseout',  e => { if (e.target.closest(HOVER_SEL)) cursor.classList.remove('active'); });
 
@@ -329,7 +393,7 @@ function renderBg(isLanding) {
 document.getElementById('home-link').onclick = e => {
   e.preventDefault();
   state.activeCat = null; state.activeSubcat = null; state.activeImage = 0; state.isLanding = true;
-  renderBg(true); renderNav(); renderThumbs(); renderPreview();
+  renderBg(true); renderNav(); renderThumbs(); renderPreview(); renderShare();
 };
 
 function renderNav() {
@@ -349,7 +413,7 @@ function renderNav() {
       btn.textContent = cat.name;
       btn.onclick = () => {
         state.activeCat = cat._id; state.activeSubcat = null; state.activeImage = 0; state.isLanding = false;
-        renderBg(false); renderNav(); animateThumbs(); renderPreview();
+        renderBg(false); renderNav(); animateThumbs(); renderPreview(); renderShare();
       };
       bottomEl.appendChild(btn);
     } else {
@@ -359,7 +423,7 @@ function renderNav() {
       btn.onclick = () => {
         if (state.activeCat === cat._id) { state.activeCat = null; state.activeSubcat = null; state.isLanding = true; }
         else { state.activeCat = cat._id; state.isLanding = false; if (cat.subcategories.length > 0) state.activeSubcat = cat.subcategories[0]._id; }
-        state.activeImage = 0; renderBg(state.isLanding); renderNav(); animateThumbs(); renderPreview();
+        state.activeImage = 0; renderBg(state.isLanding); renderNav(); animateThumbs(); renderPreview(); renderShare();
       };
       topEl.appendChild(btn);
       if (isActive) {
@@ -417,16 +481,33 @@ function renderThumbs() { animateThumbs(); }
 
 function renderPreview() {
   const p = document.getElementById('main-preview');
+  const cap = document.getElementById('preview-caption');
   const imgs = getActiveImages();
-  if (imgs.length === 0 || state.activeImage >= imgs.length) { p.innerHTML = ''; return; }
-  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
+  if (imgs.length === 0 || state.activeImage >= imgs.length) { p.innerHTML = ''; cap.textContent = ''; cap.classList.remove('visible'); return; }
+  const imgData = imgs[state.activeImage];
+  buildPreview(p, imgData.url + '?auto=format');
+  if (imgData.alt) {
+    cap.textContent = imgData.alt;
+    requestAnimationFrame(() => cap.classList.add('visible'));
+  } else {
+    cap.textContent = ''; cap.classList.remove('visible');
+  }
 }
 
 function animatePreview() {
   const p = document.getElementById('main-preview');
+  const cap = document.getElementById('preview-caption');
   const imgs = getActiveImages();
   if (imgs.length === 0 || state.activeImage >= imgs.length) return;
-  buildPreview(p, imgs[state.activeImage].url + '?auto=format');
+  const imgData = imgs[state.activeImage];
+  buildPreview(p, imgData.url + '?auto=format');
+  cap.classList.remove('visible');
+  if (imgData.alt) {
+    cap.textContent = imgData.alt;
+    requestAnimationFrame(() => requestAnimationFrame(() => cap.classList.add('visible')));
+  } else {
+    cap.textContent = '';
+  }
 }
 
 function buildPreview(container, src) {
@@ -438,6 +519,38 @@ function buildPreview(container, src) {
   void w.offsetWidth; w.classList.add('reveal');
 }
 
+// ══ SHARE SECTION ══
+let shareData = null;
+let shareOpen = false;
+
+function renderShare() {
+  const section = document.getElementById('share-section');
+  const linksEl = document.getElementById('share-links');
+  if (!shareData || !shareData.links || shareData.links.length === 0) {
+    section.style.display = 'none'; return;
+  }
+  section.style.display = state.isLanding ? 'block' : 'none';
+  if (!state.isLanding) { shareOpen = false; linksEl.innerHTML = ''; return; }
+
+  const toggle = document.getElementById('share-toggle');
+  toggle.textContent = shareData.label || 'SHARE';
+  toggle.onclick = () => {
+    shareOpen = !shareOpen;
+    linksEl.innerHTML = '';
+    if (shareOpen) {
+      shareData.links.forEach((link, i) => {
+        const a = document.createElement('a');
+        a.className = 'share-link';
+        a.href = link.url.includes('@') && !link.url.startsWith('mailto:') ? 'mailto:' + link.url : link.url;
+        a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = link.label;
+        linksEl.appendChild(a);
+        setTimeout(() => a.classList.add('visible'), i * 80 + 40);
+      });
+    }
+  };
+}
+
 async function init() {
   try {
     const result = await sanityFetch(`*[_type == "portfolioSettings"][0]{
@@ -446,8 +559,11 @@ async function init() {
     const categories = await sanityFetch(`*[_type == "category"] | order(order asc) {
       _id, name, order,
       "subcategories": *[_type == "project" && references(^._id)] | order(order asc) {
-        _id, name, order, images[]{ "url": asset->url }
+        _id, name, order, images[]{ "url": asset->url, alt }
       }
+    }`);
+    shareData = await sanityFetch(`*[_type == "shareSettings"][0]{
+      label, links[]{ label, url }
     }`);
     portfolioData = { settings: result || {}, categories: categories || [] };
     if (portfolioData.settings.accentColor) applyAccentColor(portfolioData.settings.accentColor);
@@ -458,7 +574,7 @@ async function init() {
   const ls = document.getElementById('loading-screen');
   ls.classList.add('fade-out');
   setTimeout(() => ls.remove(), 600);
-  renderBg(true); renderNav(); renderThumbs(); renderPreview();
+  renderBg(true); renderNav(); renderThumbs(); renderPreview(); renderShare();
 }
 init();
 </script>
